@@ -88,9 +88,19 @@ class Piece{
     );
     this.shape = rotatedShape.reverse();
   }
-  collideWithBottom(){
-    return this.y + this.shape.length > heightInBlocks;
-  };
+  collideWithBottom() {
+    return this.y + this.shape.length >= heightInBlocks;
+  }
+  collideWithPiece(grid) {
+    for (let y = 0; y < this.shape.length; y++) {
+      for (let x = 0; x < this.shape[y].length; x++) {
+        if (this.shape[y][x] !== 0 && (grid[this.y + y] && grid[this.y + y][this.x + x]) !== 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 class Grid {
@@ -113,7 +123,15 @@ class Grid {
       }
     }
   }
-
+  // addPiece(piece) {
+  //   piece.shape.forEach((row, y) => {
+  //     row.forEach((value, x) => {
+  //       if (value > 0) {
+  //         this.grid[piece.y + y][piece.x + x] = 1; // Update the grid with 1 instead of the color of the piece
+  //       }
+  //     });
+  //   });
+  // }
   addPiece(piece) {
     piece.shape.forEach((row, y) => {
       row.forEach((value, x) => {
@@ -131,16 +149,40 @@ function selectPiece(){
   piece = new Piece(Math.floor(widthInBlocks/2), 0, shapes[randomPiece], blockSize, ctx, colors[randomPiece]);
   piece.draw();
   setInterval(() => {
-    if (piece.collideWithBottom()) {
-      grid.addPiece(piece); // Add the piece to the grid when it collides with the bottom
+    piece.y++;
+    if (piece.collideWithBottom() || piece.collideWithPiece(grid.grid)) {
+      piece.y--; // Move the piece back up
+      grid.addPiece(piece); // Add the piece to the grid when it collides with the bottom or another piece
       piece = new Piece(Math.floor(widthInBlocks / 2), 0, shapes[randomIndex()], blockSize, ctx, colors[randomIndex()]);
-    } else {
-      piece.y++;
     }
     ctx.clearRect(0, 0, width, height);
     grid.createGrid();
     piece.draw();
   }, 1000);
+  
+  // setInterval(() => {
+  //   if (piece.collideWithBottom() || piece.collideWithPiece(grid.grid)) {
+  //     grid.addPiece(piece); // Add the piece to the grid when it collides with the bottom or another piece
+  //     piece = new Piece(Math.floor(widthInBlocks / 2), 0, shapes[randomIndex()], blockSize, ctx, colors[randomIndex()]);
+  //   } else {
+  //     piece.y++;
+  //   }
+  //   ctx.clearRect(0, 0, width, height);
+  //   grid.createGrid();
+  //   piece.draw();
+  // }, 1000);
+
+  // setInterval(() => {
+  //   if (piece.collideWithBottom()) {
+  //     grid.addPiece(piece); // Add the piece to the grid when it collides with the bottom
+  //     piece = new Piece(Math.floor(widthInBlocks / 2), 0, shapes[randomIndex()], blockSize, ctx, colors[randomIndex()]);
+  //   } else {
+  //     piece.y++;
+  //   }
+  //   ctx.clearRect(0, 0, width, height);
+  //   grid.createGrid();
+  //   piece.draw();
+  // }, 1000);
 }
 window.addEventListener('keydown', (e) => {
   ctx.clearRect(0, 0, width, height);
